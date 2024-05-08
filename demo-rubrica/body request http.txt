@@ -1,0 +1,19 @@
+persona:
+{
+    "nome": "test",
+    "cognome": "test",
+    "email": "test@test.it",
+    "indirizzo": "via test 21",
+    "numTel": "1213456789",
+    "tags": ["1", "2"]
+}
+
+tags: 
+[
+    {
+        "tag": "3"
+    },
+    {
+        "tag": "4"
+    }
+]

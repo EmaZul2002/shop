@@ -15,5 +15,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Db {
-    public Map<String, Persona> db = new HashMap<>();
+    public Map<String, Persona> db = new HashMap<>(); //posto dove viene salvata la rubrica
 }
