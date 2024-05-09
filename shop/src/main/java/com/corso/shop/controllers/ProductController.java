@@ -3,40 +3,39 @@ package com.corso.shop.controllers;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corso.shop.models.Product;
 import com.corso.shop.services.interfaces.ProductService;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-    private final ProductService productService;
+    private final ProductService ProductService;
     
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductService ProductService) {
+        this.ProductService = ProductService;
     }
 
     @GetMapping("")
     public List<Product> getAll() {
-        return productService.findAll();
+        return ProductService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Product getById(@RequestParam String id) {
-        return productService.findById(id).orElse(null);
+    public Product getById(@PathVariable String id) {
+        System.out.println(id);
+        return ProductService.findById(id).orElse(null);
     }
 
     @PostMapping("")
-    public Product save(@RequestBody Product product) {
-        return productService.save(product);
+    public Product save(@PathVariable Product product) {
+        return ProductService.save(product);
     }
     
 }
