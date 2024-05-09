@@ -1,5 +1,6 @@
 package com.corso.shop.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,5 +31,24 @@ public class ProductServiceImplement implements ProductService{
     public Product save(Product product) {
         return productRepository.save(product);
     }
-    
+
+    public List<Product> findByCategory(String category) {
+        return productRepository.findByCategory(category);
+    }
+
+    public void changeAvaiability(String id, Number avaiability) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product != null) {
+            product.setAvaiability(avaiability);
+            productRepository.save(product);
+        }
+    }
+
+    public Boolean isAvailable(String id) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product != null) {
+            return product.getAvaiability() != null && product.getAvaiability().intValue() > 0;
+        }
+        return false;
+    }
 }

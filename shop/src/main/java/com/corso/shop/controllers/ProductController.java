@@ -38,4 +38,13 @@ public class ProductController {
         return ProductService.save(product);
     }
     
+    @PostMapping("category/{category}")
+    public List<Product> getByCategory(@PathVariable String category) {
+        return ProductService.findByCategory(category);
+    }
+
+    @PostMapping("avaiability/{id}/{avaiability}")
+    public void changeAvaiability(@PathVariable String id, @PathVariable Number avaiability) {
+        ProductService.changeAvaiability(id, avaiability);
+    }
 }

@@ -1,5 +1,7 @@
 package com.corso.shop.models;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,7 +23,7 @@ public class Product {
     @NonNull
     private String code;
     private String title;
-    private String category;
+    private List<Category> category;
     private String description;
     private Long price;
     private Number avaiability;

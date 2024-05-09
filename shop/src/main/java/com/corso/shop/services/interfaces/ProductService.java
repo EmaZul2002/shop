@@ -15,4 +15,7 @@ public interface ProductService {
 
     Product save(Product product);
     
+    List<Product> findByCategory(String category);
+
+    void changeAvaiability(String id, Number avaiability);
 }
