@@ -1,16 +1,11 @@
 package com.corso.shop.models;
 
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.mongodb.lang.NonNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -23,8 +18,8 @@ public class Product {
     @NonNull
     private String code;
     private String title;
-    private List<Category> category;
+    private String category;
     private String description;
     private Long price;
-    private Number avaiability;
+    private Number availability;
 }
