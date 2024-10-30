@@ -11,11 +11,11 @@ import java.util.Optional;
 //@RequestMapping("/api/products")
 public class ProductController {
 
-    //List products: /api/products
-    //Get product by Id: /api/products/{id}
-    //Search by category: /api/products/category/{category}
-    //Create product: POST /api/products
-    //Change availability: PUT /api/products/{id}/availability/{value}
+    //List products: /products
+    //Get product by Id: /products/{id}
+    //Search by category: /products/category/{category}
+    //Create product: POST /products
+    //Change availability: PUT /products/{id}/availability/{value}
 
     private final ProductService productService;
 

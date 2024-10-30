@@ -1,0 +1,29 @@
+Progetto 3: User Management.
+JSON Web Token (JWT) è un modo per rappresentare le informazioni sull’ente che esegue la
+chiamata ad un API. Permette di realizzare l’autenticazione ed autorizzazione delle chiamate API: il
+server ricupera e valida i dati senza usare un servizio aggiuntivo.
+Baseline
+- Progetto “shop” realizzato durante le lezioni che contiene due servizi, “shop-catalog” e
+“shop-purchase”.
+- Componenti infrastrutturali di Spring Cloud:
+o Registry
+o Gateway
+o Distributed tracing.
+
+Attività
+1. User Service
+- Realizzare un microservizio per la gestione ed autenticazione di un utente dell’app. In
+particolare, il servizio deve esporre la funzionalità di
+o POST /register: registrazione di un utente dando JSON con email, nome, cognome,
+e password. Come risultato, il metodo restituisce JSON con email, nome, cognome,
+e id dell’utente (es., generato dal DB).
+o POST /login: login di utente dando email e password. Verifica che le credenziali
+sono validi e restituisce un oggetto con JWT token. Il token deve codificare email, id
+utente, data di scadenza di token e deve essere corrispondentemente firmato.
+- Realizzare un Unit Test che verifica la funzionalità del nuovo componente; copertura 90%.
+2. Estensione proxy
+- Estendere gateway in modo che per il servizio / purchase viene esposto il metodo
+/purchase/api/purchase/me invece di /api/purchase/{userId}. Si prevede che per ogni
+chiamata viene passato http header “Authorization” con valore di JWT token.
+- Il router di proxy deve verificare il token e chiamare il metodo /api/purchase/{userId} del
+servizio /shop-purchase usando userId dal token.
