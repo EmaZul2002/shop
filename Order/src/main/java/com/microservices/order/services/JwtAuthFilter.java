@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OrderServiceImpl implements OrderService {
+public class JwtAuthFilter implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
     private final FeignProductService feignProductService;
     private final CircuitBreakerFactory circuitBreakerFactory;
 
-    public OrderServiceImpl(OrderRepository orderRepository,
+    public JwtAuthFilter(OrderRepository orderRepository,
                             RestTemplate restTemplate,
                             FeignProductService feignProductService,
                             CircuitBreakerFactory circuitBreakerFactory) {
