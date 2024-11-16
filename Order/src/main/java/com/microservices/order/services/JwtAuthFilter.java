@@ -1,109 +1,38 @@
 package com.microservices.order.services;
 
-import com.microservices.order.models.Order;
-import com.microservices.order.models.shared.Product;
-import com.microservices.order.repositories.OrderRepository;
-import com.microservices.order.services.interfaces.OrderService;
-import com.microservices.order.services.openfeign.FeignProductService;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.filter.OncePerRequestFilter;
+import com.microservices.order.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import java.io.IOException;
 
-import java.util.List;
-import java.util.Optional;
+@Component
+public class JwtAuthFilter extends OncePerRequestFilter {
 
-@Service
-public class JwtAuthFilter implements OrderService {
-
-    private final OrderRepository orderRepository;
-    private final RestTemplate restTemplate;
-    private final FeignProductService feignProductService;
-    private final CircuitBreakerFactory circuitBreakerFactory;
-
-    public JwtAuthFilter(OrderRepository orderRepository,
-                            RestTemplate restTemplate,
-                            FeignProductService feignProductService,
-                            CircuitBreakerFactory circuitBreakerFactory) {
-        this.orderRepository = orderRepository;
-        this.restTemplate = restTemplate;
-        this.feignProductService = feignProductService;
-        this.circuitBreakerFactory = circuitBreakerFactory;
-    }
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
-    public List<Order> getUserPurchases(String userId) {
-        return orderRepository.findByUserId(userId);
-    }
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-    @Override
-    public Optional<Order> getPurchase(String userId, String id) {
-        return orderRepository.findByUserIdAndId(userId, id);
-    }
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
 
-    @Override
-    public Optional<Order> buy(String userId, Integer count, String productId) {
-
-        CircuitBreaker circuitBreaker = circuitBreakerFactory
-                .create("product-service-circuit-breaker");
-
-//        RestTemplate way
-//
-//        Optional<Product> product =
-//                Optional.ofNullable(restTemplate.getForObject(
-//                        "http://catalog/api/products/{productId}",
-//                        Product.class,
-//                        productId));
-
-//      Feign Way + CircuitBreaker
-        Optional<Product> product =
-                Optional.ofNullable(
-                        circuitBreaker.run(
-                                () -> {
-                                    // Call catalog service
-                                    return feignProductService
-                                            .getProduct(productId);
-                                },
-                                throwable -> {
-                                    // return something
-                                    throw new RuntimeException("Product Service Not available");
-                                }
-                        )
-                );
-        // 1. check disponibilita'
-        return product.map(p -> {
-            if (p.getAvailability() >= count) {
-                Order newOrder = new Order();
-                newOrder.setUserId(userId);
-                newOrder.setProductId(productId);
-                newOrder.setProductTitle(p.getTitle());
-                newOrder.setProductCategory(p.getCategory());
-                newOrder.setPrice(p.getPrice() * count);
-                newOrder.setQuantity(count);
-
-                // 2. Save the order
-                Order order = orderRepository.save(newOrder);
-
-                // 3. Update product availability
-                // RestTemplate way
-//                restTemplate.exchange(
-//                        "http://catalog/api/products/{productId}/availability/{quantity}",
-//                        HttpMethod.PUT,
-//                        null,
-//                        Product.class,
-//                        productId,
-//                        p.getAvailability() - count).getBody();
-
-
-                feignProductService.updateProductAvailability(
-                        productId,
-                        p.getAvailability() - count);
-
-                // 4. return the order
-                return order;
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        username, null, null);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-            throw new RuntimeException("Product not available");
-        });
+        }
+        filterChain.doFilter(request, response);
     }
 }

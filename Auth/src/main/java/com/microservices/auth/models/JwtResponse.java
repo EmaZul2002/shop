@@ -1,26 +1,10 @@
-package com.microservices.catalog.models;
+package com.microservices.auth.models;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Document(collection = "catalog")
 public class JwtResponse {
-
-    @Id
-    private String id;
-
-    private String code;
-    private String title;
-    private String category;
-    private String description;
-    private Double price;
-    private Integer availability;
+    private String token;
 }

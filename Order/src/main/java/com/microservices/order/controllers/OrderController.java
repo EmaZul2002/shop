@@ -4,53 +4,33 @@ import com.microservices.order.models.Order;
 import com.microservices.order.models.dto.OrderRequest;
 import com.microservices.order.services.interfaces.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-// Disable when gateway is enabled
-//@RequestMapping("/api/purchases")
+@RequestMapping("/api/orders")
 public class OrderController {
 
-
     @Autowired
-    DiscoveryClient discoveryClient;
+    private OrderService orderService;
 
-
-    private final OrderService orderService;
-
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
+    @GetMapping("/user")
+    public ResponseEntity<List<Order>> getUserOrders(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        List<Order> orders = orderService.getUserPurchases(userId);
+        return ResponseEntity.ok(orders);
     }
 
-    //List user purchases : /purchases/{userId}
-    @GetMapping("/{userId}")
-    public List<Order> getUserPurchases(@PathVariable String userId) {
-        return orderService.getUserPurchases(userId);
+    @PostMapping
+    public ResponseEntity<Optional<Order>> createOrder(@RequestBody OrderRequest orderRequest,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        Optional<Order> order = orderService.buy(userId, orderRequest.getQuantity(), orderRequest.getProductId());
+        return ResponseEntity.ok(order);
     }
-
-    //Get purchase: /purchases/{userId}/{id}
-    @GetMapping("/{userId}/{id}")
-    public Optional<Order> getPurchase(@PathVariable String userId,
-                                       @PathVariable String id) {
-        return orderService.getPurchase(userId, id);
-    }
-
-    //Buy: POST /purchases
-    @PostMapping("")
-    public Optional<Order> buy(@RequestBody OrderRequest orderRequest) {
-        return orderService.buy(
-                orderRequest.getUserId(),
-                orderRequest.getCount(),
-                orderRequest.getProductId());
-    }
-
-//    @GetMapping("/test")
-//    public String test() {
-//        discoveryClient.getInstances("catalog").forEach(i -> System.out.println(i.getUri()));
-//        return "test";
-//    }
 }
