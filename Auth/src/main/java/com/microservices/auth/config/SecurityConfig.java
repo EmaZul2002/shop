@@ -22,13 +22,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Disabilita CSRF
+        http.csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Permetti accesso libero agli endpoint di autenticazione
-                .anyRequest().authenticated() // Richiedi autenticazione per tutti gli altri endpoint
+                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Permetti registrazione e login senza autenticazione
+                .anyRequest().authenticated() // Richiedi autenticazione per altri endpoint
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Aggiungi il filtro JWT
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Filtro JWT
         return http.build();
     }
 
