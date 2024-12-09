@@ -19,7 +19,10 @@ public class GatewayConfig {
                         .uri("lb://catalog"))
 
                 .route("order", r -> r.path("/purchases/**")
-                        .filters(f -> f.stripPrefix(1))
+                        .filters(f -> f
+                                .circuitBreaker(cb ->
+                                        cb.setFallbackUri("forward:/fallback-catalog"))
+                                .stripPrefix(1))
                         .uri("lb://order"))
                 .build();
     }

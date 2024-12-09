@@ -14,10 +14,10 @@ Attività
 1. User Service
 - Realizzare un microservizio per la gestione ed autenticazione di un utente dell’app. In
 particolare, il servizio deve esporre la funzionalità di
-o POST /register: registrazione di un utente dando JSON con email, nome, cognome,
+- POST /register: registrazione di un utente dando JSON con email, nome, cognome,
 e password. Come risultato, il metodo restituisce JSON con email, nome, cognome,
 e id dell’utente (es., generato dal DB).
-o POST /login: login di utente dando email e password. Verifica che le credenziali
+- POST /login: login di utente dando email e password. Verifica che le credenziali
 sono validi e restituisce un oggetto con JWT token. Il token deve codificare email, id
 utente, data di scadenza di token e deve essere corrispondentemente firmato.
 - Realizzare un Unit Test che verifica la funzionalità del nuovo componente; copertura 90%.

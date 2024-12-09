@@ -1,18 +1,16 @@
 package com.microservices.auth.services;
 
-import com.microservices.auth.services.JwtUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
 import java.io.IOException;
 
-@WebFilter("/*")
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
@@ -24,16 +22,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final String token = getJwtFromRequest(request);
+        try {
+            String token = getJwtFromRequest(request);
 
-        if (token != null && jwtUtils.validateToken(token, getUsernameFromToken(token))) {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    getUsernameFromToken(token),
-                    null,
-                    null // Non hai bisogno di passare authorities se non sono richieste
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (token != null && jwtUtils.validateToken(token)) {
+                String email = jwtUtils.extractEmail(token);
+
+                // Crea un oggetto Authentication e impostalo nel SecurityContext
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        email,
+                        null,
+                        null // Authorities possono essere aggiunte qui, se necessario
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (Exception ex) {
+            // Log dell'errore o risposta di errore, se necessario
+            System.out.println("Impossibile impostare l'autenticazione nel contesto di sicurezza: " + ex.getMessage());
         }
+
         filterChain.doFilter(request, response);
     }
 
@@ -44,10 +52,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
-    }
-
-    // Estrae il nome utente dal token (subject)
-    private String getUsernameFromToken(String token) {
-        return jwtUtils.extractUsername(token);
     }
 }

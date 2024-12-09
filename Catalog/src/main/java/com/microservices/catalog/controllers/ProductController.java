@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-//@RequestMapping("/api/products")
+@RequestMapping("/api/products")
 public class ProductController {
 
     //List products: /products
@@ -54,4 +54,8 @@ public class ProductController {
         return productService.updateAvailability(id, value);
     }
 
+    @GetMapping("/paperino")
+    public String getMethodName() {
+        return new String("Sono io paperino");
+    }
 }

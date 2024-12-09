@@ -1,6 +1,7 @@
 package com.microservices.auth.config;
 
 import com.microservices.auth.services.JwtAuthFilter;
+import com.microservices.auth.services.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,20 +15,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtUtils jwtUtils;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
-        this.jwtAuthFilter = jwtAuthFilter;
+    public SecurityConfig(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Permetti registrazione e login senza autenticazione
-                .anyRequest().authenticated() // Richiedi autenticazione per altri endpoint
+                .requestMatchers("/api/auth/**").permitAll() // Permetti tutti gli endpoint di auth
+                .anyRequest().authenticated() // Richiedi autenticazione per gli altri endpoint
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Filtro JWT
+            .addFilterBefore(new JwtAuthFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class); // Aggiungi JwtAuthFilter
         return http.build();
     }
 
@@ -38,6 +39,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Utilizza BCrypt per criptare le password
+        return new BCryptPasswordEncoder();
     }
 }

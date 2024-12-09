@@ -12,8 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/order")
 public class OrderController {
 
     @Autowired
@@ -33,4 +34,10 @@ public class OrderController {
         Optional<Order> order = orderService.buy(userId, orderRequest.getQuantity(), orderRequest.getProductId());
         return ResponseEntity.ok(order);
     }
+
+    @GetMapping("/paperino")
+    public String getMethodName() {
+        return new String("Sono io paperino");
+    }
+    
 }
