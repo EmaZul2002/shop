@@ -3,6 +3,8 @@ package com.microservices.auth.services;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -13,12 +15,13 @@ public class JwtUtils {
 
     private static final Key key = Keys.hmacShaKeyFor("abcdefghijklmnopqrtuvwxyz1234567890".getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String userId) {
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis())) // 1 giorno
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setSubject(email) // Imposta l'email come subject
+                .claim("id", userId) // Inserisce l'ID utente come claim
+                .setIssuedAt(new Date()) // Data di emissione
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // Data di scadenza
+                .signWith(key, SignatureAlgorithm.HS256) // Firma il token con HMAC-SHA256
                 .compact();
     }
 

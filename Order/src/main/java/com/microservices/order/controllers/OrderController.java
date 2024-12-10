@@ -34,10 +34,4 @@ public class OrderController {
         Optional<Order> order = orderService.buy(userId, orderRequest.getQuantity(), orderRequest.getProductId());
         return ResponseEntity.ok(order);
     }
-
-    @GetMapping("/paperino")
-    public String getMethodName() {
-        return new String("Sono io paperino");
-    }
-    
 }

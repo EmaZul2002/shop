@@ -53,9 +53,4 @@ public class ProductController {
                                       @PathVariable Integer value) {
         return productService.updateAvailability(id, value);
     }
-
-    @GetMapping("/paperino")
-    public String getMethodName() {
-        return new String("Sono io paperino");
-    }
 }

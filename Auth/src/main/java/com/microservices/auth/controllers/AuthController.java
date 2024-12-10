@@ -1,14 +1,15 @@
 package com.microservices.auth.controllers;
 
 import com.microservices.auth.models.User;
-import com.microservices.auth.models.UserId;
 import com.microservices.auth.models.JwtResponse;
 import com.microservices.auth.models.LoginRequest;
 import com.microservices.auth.models.Message;
+import com.microservices.auth.models.RegisterResponse;
 import com.microservices.auth.repositories.UserRepository;
 import com.microservices.auth.services.JwtUtils;
 
 import org.springframework.http.HttpStatus;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,32 +36,42 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         User userFound = userRepository.findByEmail(user.getEmail()).get();
-        UserId userId = new UserId(userFound.getId());
-        return new ResponseEntity<>(userId, HttpStatus.CREATED);
+        RegisterResponse registerResponse = new RegisterResponse(
+                userFound.getId(),
+                userFound.getEmail(),
+                userFound.getNome(),
+                userFound.getCognome());
+        return new ResponseEntity<>(registerResponse, HttpStatus.CREATED);
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        // Cerca l'utente nel database tramite email
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Credenziali errate!"));
+
+        // Verifica la password
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.badRequest().body(new JwtResponse("Credenziali errate!"));
         }
-        String token = jwtUtils.generateToken(loginRequest.getEmail());
+
+        // Genera il token JWT
+        String token = jwtUtils.generateToken(user.getId(), user.getEmail());
+
+        // Restituisci il token JWT come risposta
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @GetMapping("/shop-purchase/userId")
-    public String secureEndpoint(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<?> secureEndpoint(@RequestHeader("Authorization") String authorizationHeader) {
         // Estrarre il token dal header
         String token = authorizationHeader.replace("Bearer ", "");
 
         // Puoi ora validare il token
         if (!jwtUtils.validateToken(token)) {
-            return "Token non valido!";
+            return new ResponseEntity<>(new Message("Token non valido!", 401),HttpStatus.UNAUTHORIZED);
         }
-        return "Token ricevuto: " + token;
+        return new ResponseEntity<>(new Message("Pagamento effettuato!", 200), HttpStatus.OK);
     }
 
 }
